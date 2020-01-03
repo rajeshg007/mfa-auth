@@ -1,4 +1,4 @@
-module mfa-auth
+module github.com/rajeshg007/mfa-auth
 
 go 1.13
 
