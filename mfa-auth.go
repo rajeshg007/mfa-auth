@@ -78,11 +78,20 @@ func main() {
 			},
 			{
 				Name:    "remove",
-				Aliases: []string{"a"},
+				Aliases: []string{"r"},
 				Usage:   "Remove a Profile to config file",
 				Flags:   commonFlags,
 				Action: func(c *cli.Context) error {
 					return remove(c)
+				},
+			},
+			{
+				Name:    "print_config",
+				Aliases: []string{"p"},
+				Usage:   "Print the contents of config file",
+				Flags:   commonFlags,
+				Action: func(c *cli.Context) error {
+					return print(c)
 				},
 			},
 		},

@@ -38,6 +38,10 @@ func getProfile() Profile {
 }
 
 func writeCredentialsFile() {
+	awsFolder := FilePathClean("~/.aws")
+	if _, err := os.Stat(awsFolder); os.IsNotExist(err) {
+		os.Mkdir(awsFolder,0777)
+	}
 	file := FilePathClean("~/.aws/credentials")
 	os.Remove(file)
 	f, err := os.Create(file)
