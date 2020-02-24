@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"os"
 	"os/exec"
+	"log"
 	"strings"
 )
 
@@ -18,7 +19,6 @@ func add(c *cli.Context) error {
 }
 
 func addProfile(accounts map[string]Profile) {
-	encodeFile, err := os.Create(FilePathClean(configfile))
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Using Profile: " + profile)
 	fmt.Print("Enter Access Key ID\t:")
@@ -32,9 +32,8 @@ func addProfile(accounts map[string]Profile) {
 	device := getDeviceId(keyid, secret)
 	fmt.Println("Using Device ", device)
 	accounts[profile] = Profile{keyid, secret, device}
-
 	fmt.Println(accounts)
-	writeConfigToFile(encodeFile, accounts)
+	writeConfigToFile(accounts)
 }
 
 type caller_identity struct {
@@ -55,16 +54,20 @@ func getDeviceId(keyid string, secret string) string {
 	output = strings.Replace(output, "\n", "", -1)
 
 	err = json.Unmarshal([]byte(output), &gci)
-	checkErr(err)
+	if err != nil {
+		log.Fatal("Unable to validate keys, Please verify them and update again")
+		log.Fatal(err)
+	}
 	serial := gci.Arn
 	serial = strings.Replace(serial, ":user/", ":mfa/", -1)
 	return serial
 }
 
-func writeConfigToFile(encodeFile *os.File, accounts map[string]Profile) {
-	encoder := gob.NewEncoder(encodeFile)
+func writeConfigToFile(accounts map[string]Profile) {
+	encodeFile, err := os.Create(FilePathClean(configfile))
 	defer encodeFile.Close()
-	if err := encoder.Encode(accounts); err != nil {
+	encoder := gob.NewEncoder(encodeFile)
+	if err = encoder.Encode(accounts); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -74,7 +77,7 @@ func readConfigFromFile() map[string]Profile {
 	_, err := os.Stat(absPath)
 	if err != nil {
 		create_configfile()
-		fmt.Print("MFA Token Might have expired in the time credentials were expired, please enter new MFA: ")
+		fmt.Print("MFA Token Might have expired in the time credentials were entered, Please enter new MFA: ")
 		reader := bufio.NewReader(os.Stdin)
 		mfa, err = reader.ReadString('\n')
 		checkErr(err)

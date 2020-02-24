@@ -9,9 +9,6 @@ import (
 	"bufio"
 	"os/exec"
 	"strings"
-	// "github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	// "github.com/aws/aws-sdk-go/aws/session"
-	// "github.com/aws/aws-sdk-go/service/sts"
 )
 
 var mfa string
@@ -33,8 +30,11 @@ func login(c *cli.Context) error {
 
 func getProfile() Profile {
 	accounts := readConfigFromFile()
-	awsprofile := accounts[profile]
-	return awsprofile
+	if _, ok := accounts[profile]; !ok {
+		fmt.Println("Credentials for selected Profile don't exist, Please add them")
+		addProfile(accounts)
+	}
+	return accounts[profile]
 }
 
 func writeCredentialsFile() {

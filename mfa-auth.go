@@ -76,13 +76,22 @@ func main() {
 					return add(c)
 				},
 			},
+			// {
+			// 	Name:    "remove",
+			// 	Aliases: []string{"r"},
+			// 	Usage:   "Remove a Profile to config file",
+			// 	Flags:   commonFlags,
+			// 	Action: func(c *cli.Context) error {
+			// 		return remove(c)
+			// 	},
+			// },
 			{
-				Name:    "remove",
-				Aliases: []string{"r"},
-				Usage:   "Remove a Profile to config file",
+				Name:    "update",
+				Aliases: []string{"u"},
+				Usage:   "Update an existing Profile in config file",
 				Flags:   commonFlags,
 				Action: func(c *cli.Context) error {
-					return remove(c)
+					return update(c)
 				},
 			},
 			{
