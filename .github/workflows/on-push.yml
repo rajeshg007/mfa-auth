@@ -58,4 +58,4 @@ jobs:
 
     - name: check
       if: ${{ github.event_name == 'push' && github.ref != 'refs/heads/master'}}
-      run: ./cross-build-upload.sh ${{ github.ref }}
+      run: ./cross-build-upload.sh ${{ github.token }} ${{ github.ref }}

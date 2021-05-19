@@ -1,9 +1,9 @@
 ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
 
 printenv
-gh auth login --with-token < ${GITHUB_TOKEN}
+gh auth login --with-token < ${0}
 
-TAG=${0##*/}
+TAG=${1##*/}
 echo "${TAG} being generated"
 for i in "${ARCH[@]}"
 do
