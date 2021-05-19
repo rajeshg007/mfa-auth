@@ -36,7 +36,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.3
       with:
-        name: mfa-auth-*
+        name: mfa-auth
         path: ./mfa-auth-*
 
     - name: Create Release
