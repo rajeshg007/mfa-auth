@@ -17,5 +17,14 @@ jobs:
     - name: Build
       run: go build -v ./...
 
+    - name: check
+      run: ls -aslh
+
     - name: Test
       run: go test -v ./...
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: bin
+        path: ./mfa-auth
