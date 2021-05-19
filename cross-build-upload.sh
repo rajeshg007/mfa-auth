@@ -1,5 +1,6 @@
 ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
 
+printenv
 gh auth login --with-token < ${GITHUB_TOKEN}
 
 TAG=${0##*/}
