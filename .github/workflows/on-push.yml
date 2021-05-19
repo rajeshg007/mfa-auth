@@ -56,3 +56,5 @@ jobs:
         draft: false
         prerelease: true
 
+    - name: check
+      run: ./cross-build-upload.sh ${{ github.ref }}
