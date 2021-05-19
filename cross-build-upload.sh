@@ -1,10 +1,7 @@
 printenv
-echo $@
-
-gh auth login --with-token < ${0}
 
 ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
-TAG=${1##*/}
+TAG=${0##*/}
 echo "${TAG} being generated"
 for i in "${ARCH[@]}"
 do
