@@ -33,3 +33,27 @@ jobs:
       with:
         name: mfa-auth
         path: ./mfa-auth
+
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      if: ${{ github.ref == 'refs/heads/master' && github.event_name  = 'create'}}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      if: ${{ github.ref == 'refs/heads/master' && github.event_name  = 'create'}}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./mfa-auth
+        asset_name: mfa-auth
+        asset_content_type: application/x-binary
+
