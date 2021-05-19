@@ -8,4 +8,4 @@ jobs:
     - uses: actions/checkout@master
 
     - name: run
-      uses: actions/build@v1
+      uses: actions/build@test
