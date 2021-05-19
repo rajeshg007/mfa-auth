@@ -1,5 +1,7 @@
 ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
 
+gh auth login --with-token < ${GITHUB_TOKEN}
+
 TAG=${0##*/}
 echo "${TAG} being generated"
 for i in "${ARCH[@]}"
