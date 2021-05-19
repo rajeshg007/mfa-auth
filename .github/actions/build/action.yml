@@ -1,0 +1,12 @@
+name: 'Golang Build'
+description: 'building a binary'
+inputs:
+  version:
+    description: 'Release Version'
+    required: true
+    default: '0.0.1'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.version }}
