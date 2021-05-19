@@ -1,7 +1,7 @@
 printenv
 
 ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
-TAG=${0##*/}
+TAG=${1##*/}
 echo "${TAG} being generated"
 for i in "${ARCH[@]}"
 do
