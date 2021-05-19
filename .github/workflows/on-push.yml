@@ -31,6 +31,9 @@ jobs:
     - name: check
       run: echo ${{github.event_name}}
 
+    - name: check
+      run: echo ${{github.ref}}
+
     - name: Test
       run: go test -v ./...
 
