@@ -1,0 +1,1 @@
+Simple golang build and test
