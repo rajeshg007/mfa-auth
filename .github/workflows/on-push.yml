@@ -56,6 +56,17 @@ jobs:
         draft: false
         prerelease: true
 
+    - name: Generate build files
+      uses: thatisuday/go-cross-build@v1
+      with:
+          platforms: 'linux/amd64, darwin/amd64, windows/amd64'
+          package: 'mfa-auth'
+          name: 'mfa-auth'
+          dest: 'dist'
+
+    - name: check
+      run: du -h
+
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       if: ${{ github.event_name == 'push' && github.ref != 'refs/heads/master'}}
