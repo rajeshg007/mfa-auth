@@ -8,4 +8,4 @@ jobs:
     - uses: actions/checkout@master
 
     - name: run
-      uses: actions/build@test
+      uses: rajeshg007/mfa-auth/.github/actions/build@test
