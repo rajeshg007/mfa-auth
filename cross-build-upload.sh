@@ -1,6 +1,7 @@
 ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
 
 printenv
+echo ${0}
 gh auth login --with-token < ${0}
 
 TAG=${1##*/}
