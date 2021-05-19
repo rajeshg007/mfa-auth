@@ -28,7 +28,7 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: check
+    - name: Cross Build
       run: ./cross-build.sh
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,7 +36,7 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.3
       with:
-        name: mfa-auth
+        name: generated-binaries
         path: ./mfa-auth-*
 
     - name: Create Release
@@ -51,7 +51,7 @@ jobs:
         draft: false
         prerelease: true
 
-    - name: check
+    - name: Upload Artifacts to release
       if: ${{ github.event_name == 'push' && github.ref != 'refs/heads/master'}}
       run: ./release-upload.sh ${{ github.ref }}
       env:
