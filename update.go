@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bufio"
+	"encoding/gob"
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"os"
-	"encoding/gob"
 	"strings"
-	"bufio"
 )
 
 func update(c *cli.Context) error {
@@ -24,11 +24,11 @@ func update(c *cli.Context) error {
 	oldProfile := accounts[profile]
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Updating Profile: " + profile)
-	fmt.Print("Enter Access Key ID ",oldProfile.Keyid,"\t:")
+	fmt.Print("Enter Access Key ID ", oldProfile.Keyid, "\t:")
 	keyid, err := reader.ReadString('\n')
 	keyid = strings.Replace(keyid, "\n", "", -1)
 	checkErr(err)
-	fmt.Print("Enter Secret Access Key ",oldProfile.Secretkey,"\t:")
+	fmt.Print("Enter Secret Access Key ", oldProfile.Secretkey, "\t:")
 	secret, err := reader.ReadString('\n')
 	secret = strings.Replace(secret, "\n", "", -1)
 	checkErr(err)

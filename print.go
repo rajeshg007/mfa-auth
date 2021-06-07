@@ -6,7 +6,7 @@ import (
 )
 
 func print(c *cli.Context) error {
-	accounts := readConfigFromFile()
+	accounts, _ := readConfigFromFile()
 	printProfile(accounts)
 	return nil
 }

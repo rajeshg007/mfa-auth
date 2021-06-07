@@ -18,7 +18,10 @@ func login(c *cli.Context) error {
 	fmt.Println("Using Profile :", profile)
 	if c.NArg() > 0 {
 		mfa = c.Args().Get(0)
-		awsprofile := getProfile()
+		awsprofile, isNew := getProfile()
+		if isNew == true {
+			mfa = readFromIO("MFA Token Might have expired in the time credentials were entered, Please enter new MFA: ")
+		}
 		awsLogin(awsprofile)
 		writeCredentialsFile()
 	} else {
@@ -28,19 +31,19 @@ func login(c *cli.Context) error {
 	return nil
 }
 
-func getProfile() Profile {
-	accounts := readConfigFromFile()
+func getProfile() (Profile, bool) {
+	accounts, isNew := readConfigFromFile()
 	if _, ok := accounts[profile]; !ok {
 		fmt.Println("Credentials for selected Profile don't exist, Please add them")
 		addProfile(accounts)
 	}
-	return accounts[profile]
+	return accounts[profile], isNew
 }
 
 func writeCredentialsFile() {
 	awsFolder := FilePathClean("~/.aws")
 	if _, err := os.Stat(awsFolder); os.IsNotExist(err) {
-		os.Mkdir(awsFolder,0777)
+		os.Mkdir(awsFolder, 0777)
 	}
 	file := FilePathClean("~/.aws/credentials")
 	os.Remove(file)
@@ -56,8 +59,7 @@ func writeCredentialsFile() {
 }
 
 func awsLogin(awsprofile Profile) {
-	fmt.Println(awsprofile)
-	fmt.Println("using mfa",mfa)
+	fmt.Println("using mfa", mfa)
 	cmd := exec.Command("aws", "sts", "get-session-token", "--serial-number", awsprofile.Device, "--token-code", mfa)
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "AWS_ACCESS_KEY_ID="+awsprofile.Keyid)

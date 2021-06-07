@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/urfave/cli/v2"
-	"log"
 	"os"
 	"sort"
 )
@@ -111,10 +110,4 @@ func main() {
 
 	err := app.Run(os.Args)
 	checkErr(err)
-}
-
-func checkErr(e error) {
-	if e != nil {
-		log.Fatal(e)
-	}
 }
