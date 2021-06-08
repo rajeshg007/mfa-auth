@@ -1,14 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"os"
-	// "reflect"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"context"
 	"bufio"
-	"os/exec"
-	"strings"
 )
 
 var mfa string
@@ -22,8 +21,8 @@ func login(c *cli.Context) error {
 		if isNew == true {
 			mfa = readFromIO("MFA Token Might have expired in the time credentials were entered, Please enter new MFA: ")
 		}
-		awsLogin(awsprofile)
-		writeCredentialsFile()
+		creds := awsLogin(awsprofile, mfa)
+		writeCredentialsFile(creds)
 	} else {
 		fmt.Println("Please Pass MFA Code to login")
 	}
@@ -40,7 +39,7 @@ func getProfile() (Profile, bool) {
 	return accounts[profile], isNew
 }
 
-func writeCredentialsFile() {
+func writeCredentialsFile(creds types.Credentials) {
 	awsFolder := FilePathClean("~/.aws")
 	if _, err := os.Stat(awsFolder); os.IsNotExist(err) {
 		os.Mkdir(awsFolder, 0777)
@@ -52,38 +51,23 @@ func writeCredentialsFile() {
 	defer f.Close()
 	w := bufio.NewWriter(f)
 	_, err = w.WriteString("[default]\n")
-	_, err = w.WriteString("aws_access_key_id=" + gst.Credentials.AccessKeyId + "\n")
-	_, err = w.WriteString("aws_secret_access_key=" + gst.Credentials.SecretAccessKey + "\n")
-	_, err = w.WriteString("aws_session_token=" + gst.Credentials.SessionToken + "\n")
+	_, err = w.WriteString("aws_access_key_id=" + *creds.AccessKeyId + "\n")
+	_, err = w.WriteString("aws_secret_access_key=" + *creds.SecretAccessKey + "\n")
+	_, err = w.WriteString("aws_session_token=" + *creds.SessionToken + "\n")
 	w.Flush()
 }
 
-func awsLogin(awsprofile Profile) {
+func awsLogin(awsprofile Profile, mfa string) types.Credentials {
 	fmt.Println("using mfa", mfa)
-	cmd := exec.Command("aws", "sts", "get-session-token", "--serial-number", awsprofile.Device, "--token-code", mfa)
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "AWS_ACCESS_KEY_ID="+awsprofile.Keyid)
-	cmd.Env = append(cmd.Env, "AWS_SECRET_ACCESS_KEY="+awsprofile.Secretkey)
-	out, err := cmd.CombinedOutput()
+	client := getSTSClientFromProfile(awsprofile)
+	duration := int32(43200)
+	input := sts.GetSessionTokenInput{}
+	input.DurationSeconds = &duration
+	input.SerialNumber = &awsprofile.Device
+	input.TokenCode = &mfa
+
+	output, err := client.GetSessionToken(context.TODO(), &input)
 	checkErr(err)
-
-	output := string(out)
-	output = strings.Replace(output, "\n", "", -1)
-
-	err = json.Unmarshal([]byte(output), &gst)
-	checkErr(err)
+	return *output.Credentials
 
 }
-
-type get_session_token struct {
-	Credentials session `json:"Credentials"`
-}
-
-type session struct {
-	SecretAccessKey string `json:"SecretAccessKey"`
-	SessionToken    string `json:"SessionToken"`
-	Expiration      string `json:"Expiration"`
-	AccessKeyId     string `json:"AccessKeyId"`
-}
-
-var gst get_session_token
