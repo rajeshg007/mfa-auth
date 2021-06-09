@@ -12,18 +12,18 @@ class MfaAuth < Formula
   on_macos do
     if Hardware::CPU.intel?
       url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.3/mfa-auth_0.0.3_darwin_amd64.tar.gz"
-      sha256 "48cf7bb877468382742100b2f649e590e5baea654b66fcef4bcde45392545ce1"
+      sha256 "71f8869061a633091dbeb3adfea81be0dbc2522cef910dd3bfef52dd0d622c8a"
     end
   end
 
   on_linux do
     if Hardware::CPU.intel?
       url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.3/mfa-auth_0.0.3_linux_amd64.tar.gz"
-      sha256 "f23fbfad843e69d9e1ed79782e1f30c8f83b18b680fb6b4310817b34cdf3ced5"
+      sha256 "fba7e59820debfc7262d52ea08b7f2d476ae252329d3cc9c3400c4589e62fc96"
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
       url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.3/mfa-auth_0.0.3_linux_arm64.tar.gz"
-      sha256 "0b4cffcbeec8888d75948d59bfc539d7a8ad846b6ff64ec8ad4329f1d642d151"
+      sha256 "164d84bc7599f372e57a1fea0ce3e858322145e8b2fee6ffb0e8bd578fe01d7e"
     end
   end
 
