@@ -3,13 +3,20 @@
 Used to create MFA Authenticated Credentials
 By Default Credentials are valid for 12 Hours.
 
-#### Install
+### Install
 
+#### Go Installer
 ```
 go install github.com/rajeshg007/mfa-auth
 ```
 
-#### Usage
+#### Homebrew
+```
+brew tap rajeshg007/tap
+brew install mfa-auth
+```
+
+### Usage
 
 Use `mfa-auth init` to configure your credentials in mfa-auth
 
