@@ -1,26 +1,44 @@
 package main
 
 import (
-	"encoding/json"
+	"bufio"
+	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/urfave/cli/v2"
 	"os"
-	// "reflect"
-	"bufio"
-	"os/exec"
-	"strings"
 )
-
-var mfa string
 
 func login(c *cli.Context) error {
 	fmt.Println("Using Configfile :", configfile)
 	fmt.Println("Using Profile :", profile)
+	if assumeRole != "" {
+		fmt.Println("Assuming Role:", assumeRole)
+	}
 	if c.NArg() > 0 {
-		mfa = c.Args().Get(0)
-		awsprofile := getProfile()
-		awsLogin(awsprofile)
-		writeCredentialsFile()
+		mfa := c.Args().Get(0)
+		// mfa := readFromIO("Please enter MFA Token: ")
+		awsprofile, isNew := getProfile()
+		if isNew == true {
+			mfa = readFromIO("MFA Token Might have expired in the time credentials were entered, Please enter new MFA: ")
+		}
+		creds := awsLogin(awsprofile, mfa)
+		if assumeRole != "" {
+			client := getSTSClientFromCredentials(creds)
+			identity, err := client.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+			checkErr(err)
+			assumeRoleARN := "arn:aws:iam::" + *identity.Account + ":role/" + assumeRole
+			username := getUser()
+			input := &sts.AssumeRoleInput{
+				RoleArn:         &assumeRoleARN,
+				RoleSessionName: &username,
+			}
+			output, err := client.AssumeRole(context.TODO(), input)
+			checkErr(err)
+			creds = *output.Credentials
+		}
+		writeCredentialsFile(creds)
 	} else {
 		fmt.Println("Please Pass MFA Code to login")
 	}
@@ -28,19 +46,19 @@ func login(c *cli.Context) error {
 	return nil
 }
 
-func getProfile() Profile {
-	accounts := readConfigFromFile()
+func getProfile() (Profile, bool) {
+	accounts, isNew := readConfigFromFile()
 	if _, ok := accounts[profile]; !ok {
 		fmt.Println("Credentials for selected Profile don't exist, Please add them")
 		addProfile(accounts)
 	}
-	return accounts[profile]
+	return accounts[profile], isNew
 }
 
-func writeCredentialsFile() {
+func writeCredentialsFile(creds types.Credentials) {
 	awsFolder := FilePathClean("~/.aws")
 	if _, err := os.Stat(awsFolder); os.IsNotExist(err) {
-		os.Mkdir(awsFolder,0777)
+		os.Mkdir(awsFolder, 0777)
 	}
 	file := FilePathClean("~/.aws/credentials")
 	os.Remove(file)
@@ -49,39 +67,23 @@ func writeCredentialsFile() {
 	defer f.Close()
 	w := bufio.NewWriter(f)
 	_, err = w.WriteString("[default]\n")
-	_, err = w.WriteString("aws_access_key_id=" + gst.Credentials.AccessKeyId + "\n")
-	_, err = w.WriteString("aws_secret_access_key=" + gst.Credentials.SecretAccessKey + "\n")
-	_, err = w.WriteString("aws_session_token=" + gst.Credentials.SessionToken + "\n")
+	_, err = w.WriteString("aws_access_key_id=" + *creds.AccessKeyId + "\n")
+	_, err = w.WriteString("aws_secret_access_key=" + *creds.SecretAccessKey + "\n")
+	_, err = w.WriteString("aws_session_token=" + *creds.SessionToken + "\n")
 	w.Flush()
 }
 
-func awsLogin(awsprofile Profile) {
-	fmt.Println(awsprofile)
-	fmt.Println("using mfa",mfa)
-	cmd := exec.Command("aws", "sts", "get-session-token", "--serial-number", awsprofile.Device, "--token-code", mfa)
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "AWS_ACCESS_KEY_ID="+awsprofile.Keyid)
-	cmd.Env = append(cmd.Env, "AWS_SECRET_ACCESS_KEY="+awsprofile.Secretkey)
-	out, err := cmd.CombinedOutput()
+func awsLogin(awsprofile Profile, mfa string) types.Credentials {
+	fmt.Println("using mfa", mfa)
+	client := getSTSClientFromProfile(awsprofile)
+	duration := int32(43200)
+	input := sts.GetSessionTokenInput{}
+	input.DurationSeconds = &duration
+	input.SerialNumber = &awsprofile.Device
+	input.TokenCode = &mfa
+
+	output, err := client.GetSessionToken(context.TODO(), &input)
 	checkErr(err)
 
-	output := string(out)
-	output = strings.Replace(output, "\n", "", -1)
-
-	err = json.Unmarshal([]byte(output), &gst)
-	checkErr(err)
-
+	return *output.Credentials
 }
-
-type get_session_token struct {
-	Credentials session `json:"Credentials"`
-}
-
-type session struct {
-	SecretAccessKey string `json:"SecretAccessKey"`
-	SessionToken    string `json:"SessionToken"`
-	Expiration      string `json:"Expiration"`
-	AccessKeyId     string `json:"AccessKeyId"`
-}
-
-var gst get_session_token

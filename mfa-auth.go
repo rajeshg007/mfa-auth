@@ -2,13 +2,13 @@ package main
 
 import (
 	"github.com/urfave/cli/v2"
-	"log"
 	"os"
 	"sort"
 )
 
 var configfile string
 var profile string
+var assumeRole string
 
 func main() {
 	commonFlags := []cli.Flag{
@@ -30,30 +30,23 @@ func main() {
 		},
 	}
 	initFlags := []cli.Flag{
-		&cli.StringFlag{
-			Name:        "configfile",
-			Aliases:     []string{"c"},
-			Value:       "~/.mfa-auth",
-			Usage:       "Base Configfile for mfa-auth",
-			Destination: &configfile,
-			EnvVars:     []string{"MFA_AUTH_CONFIG"},
-		},
-		&cli.StringFlag{
-			Name:        "profile",
-			Aliases:     []string{"p"},
-			Value:       "default",
-			Usage:       "pass the flag to use a non default profile",
-			Destination: &profile,
-			EnvVars:     []string{"MFA_AUTH_PROFILE"},
-		},
 		&cli.BoolFlag{
 			Name:    "reinitialize",
 			Aliases: []string{"r"},
 			Usage:   "recreate config file",
 		},
 	}
+	loginFlags := []cli.Flag{
+		&cli.StringFlag{
+			Name:        "assume-role",
+			Aliases:     []string{"ar"},
+			Destination: &assumeRole,
+			Value:       "",
+			Usage:       "login and assume a role",
+		},
+	}
 	app := &cli.App{
-		Flags: commonFlags,
+		Flags: append(loginFlags, commonFlags...),
 		Action: func(c *cli.Context) error {
 			return login(c)
 		},
@@ -62,7 +55,7 @@ func main() {
 				Name:    "init",
 				Aliases: []string{"i"},
 				Usage:   "create an new config file",
-				Flags:   initFlags,
+				Flags:   append(initFlags, commonFlags...),
 				Action: func(c *cli.Context) error {
 					return mfa_init(c)
 				},
@@ -111,10 +104,4 @@ func main() {
 
 	err := app.Run(os.Args)
 	checkErr(err)
-}
-
-func checkErr(e error) {
-	if e != nil {
-		log.Fatal(e)
-	}
 }
