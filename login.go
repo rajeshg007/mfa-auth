@@ -1,27 +1,41 @@
 package main
 
 import (
+	"bufio"
+	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/urfave/cli/v2"
 	"os"
-	"github.com/aws/aws-sdk-go-v2/service/sts/types"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"context"
-	"bufio"
 )
-
-var mfa string
 
 func login(c *cli.Context) error {
 	fmt.Println("Using Configfile :", configfile)
 	fmt.Println("Using Profile :", profile)
+	fmt.Println("Assuming Role:", assumeRole)
 	if c.NArg() > 0 {
-		mfa = c.Args().Get(0)
+		mfa := c.Args().Get(0)
+		// mfa := readFromIO("Please enter MFA Token: ")
 		awsprofile, isNew := getProfile()
 		if isNew == true {
 			mfa = readFromIO("MFA Token Might have expired in the time credentials were entered, Please enter new MFA: ")
 		}
 		creds := awsLogin(awsprofile, mfa)
+		if assumeRole != "" {
+			client := getSTSClientFromCredentials(creds)
+			identity, err := client.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+			checkErr(err)
+			assumeRoleARN := "arn:aws:iam::" + *identity.Account + ":role/" + assumeRole
+			username := getUser()
+			input := &sts.AssumeRoleInput{
+				RoleArn:         &assumeRoleARN,
+				RoleSessionName: &username,
+			}
+			output, err := client.AssumeRole(context.TODO(), input)
+			checkErr(err)
+			creds = *output.Credentials
+		}
 		writeCredentialsFile(creds)
 	} else {
 		fmt.Println("Please Pass MFA Code to login")
@@ -68,6 +82,6 @@ func awsLogin(awsprofile Profile, mfa string) types.Credentials {
 
 	output, err := client.GetSessionToken(context.TODO(), &input)
 	checkErr(err)
-	return *output.Credentials
 
+	return *output.Credentials
 }

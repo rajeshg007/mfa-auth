@@ -8,8 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"log"
 	"os"
+	"os/user"
 	"strings"
 )
 
@@ -51,6 +53,21 @@ func getSTSClientFromKeys(keyid string, secret string) *sts.Client {
 	return client
 }
 
+func getSTSClientFromCredentials(creds types.Credentials) *sts.Client {
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithCredentialsProvider(credentials.StaticCredentialsProvider{
+			Value: aws.Credentials{
+				AccessKeyID: *creds.AccessKeyId, SecretAccessKey: *creds.SecretAccessKey, SessionToken: *creds.SessionToken,
+				Source: "Profile Based Credentials",
+			},
+		}))
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := sts.NewFromConfig(cfg)
+	return client
+}
+
 func readFromIO(ques string) string {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(ques)
@@ -58,4 +75,9 @@ func readFromIO(ques string) string {
 	checkErr(err)
 	readVal = strings.Replace(readVal, "\n", "", -1)
 	return readVal
+}
+
+func getUser() string {
+	user, _ := user.Current()
+	return user.Username
 }
