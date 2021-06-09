@@ -5,25 +5,25 @@
 class MfaAuth < Formula
   desc "Helper tool to store and run "
   homepage ""
-  version "0.0.3"
+  version "0.0.4"
   license "MIT"
   bottle :unneeded
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.3/mfa-auth_0.0.3_darwin_amd64.tar.gz"
-      sha256 "71f8869061a633091dbeb3adfea81be0dbc2522cef910dd3bfef52dd0d622c8a"
+      url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.4/mfa-auth_0.0.4_darwin_amd64.tar.gz"
+      sha256 "d23e221e93218f9704639fb431074f0830f0a1206eb39136a79ca8182712757c"
     end
   end
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.3/mfa-auth_0.0.3_linux_amd64.tar.gz"
-      sha256 "fba7e59820debfc7262d52ea08b7f2d476ae252329d3cc9c3400c4589e62fc96"
+      url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.4/mfa-auth_0.0.4_linux_amd64.tar.gz"
+      sha256 "7682deeae36d23900d78c0fce17593bccb49446660f9207661e642625af11982"
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.3/mfa-auth_0.0.3_linux_arm64.tar.gz"
-      sha256 "164d84bc7599f372e57a1fea0ce3e858322145e8b2fee6ffb0e8bd578fe01d7e"
+      url "https://github.com/rajeshg007/mfa-auth/releases/download/v0.0.4/mfa-auth_0.0.4_linux_arm64.tar.gz"
+      sha256 "a728e5ba9256712651b7041c2308f5bed339f78381eda157a24d87e83414518a"
     end
   end
 
