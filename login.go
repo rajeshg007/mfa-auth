@@ -13,7 +13,9 @@ import (
 func login(c *cli.Context) error {
 	fmt.Println("Using Configfile :", configfile)
 	fmt.Println("Using Profile :", profile)
-	fmt.Println("Assuming Role:", assumeRole)
+	if assumeRole != "" {
+		fmt.Println("Assuming Role:", assumeRole)
+	}
 	if c.NArg() > 0 {
 		mfa := c.Args().Get(0)
 		// mfa := readFromIO("Please enter MFA Token: ")
