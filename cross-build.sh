@@ -1,4 +1,4 @@
-ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
+ARCH=(linux/amd64 linux/arm darwin/amd64 darwin/arm64 windows/amd64 windows/arm)
 for i in "${ARCH[@]}"
 do
 	arrIN=(${i//\// })
