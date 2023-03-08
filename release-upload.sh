@@ -1,4 +1,4 @@
-ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm)
+ARCH=(linux/amd64 linux/arm darwin/amd64 windows/amd64 windows/arm darwin/arm64)
 TAG=${1##*/}
 echo "${TAG} being generated"
 for i in "${ARCH[@]}"
